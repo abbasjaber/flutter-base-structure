@@ -1,16 +1,16 @@
-# app
+# flutter-base-structure
+"Flutter Base Structure" is a project to template and introduce an approach to developing Flutter apps, including architecture and project structure.
 
-A new Flutter project.
+# clone the repo
+git clone https://github.com/abbasjaber/flutter-base-structure.git 
 
-## Getting Started
+# move to the cloned repo
+cd flutter-base-structure
 
-This project is a starting point for a Flutter application.
+# get dependencies
+flutter pub get
 
-A few resources to get you started if this is your first Flutter project:
+# run application
+flutter run
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Happy coding :)
