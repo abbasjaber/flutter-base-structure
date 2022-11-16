@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'remote/di/di_container.dart' as di;
 
-void main() {
+void main()async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await di.init();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => di.sl<AuthProvider>()),
   ], child: const MyApp()));
