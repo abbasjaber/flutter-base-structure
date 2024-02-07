@@ -1,4 +1,6 @@
+import 'package:app/remote/providers/example_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key, required this.title});
@@ -8,12 +10,24 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  ExamoleProvider? examoleProvider;
   int _counter = 0;
 
   void _incrementCounter() {
     setState(() {
       _counter++;
     });
+  }
+
+  Future<void> init() async {
+    await examoleProvider!.getItems();
+  }
+
+  @override
+  void initState() {
+    examoleProvider = Provider.of<ExamoleProvider>(context, listen: false);
+    init();
+    super.initState();
   }
 
   @override
