@@ -29,7 +29,7 @@ Future<void> init() async {
 
   // Providers
   sl.registerFactory(() => AuthProvider(authRepo: sl()));
-  sl.registerFactory(() => ExamoleProvider(examoleRepo: sl()));
+  sl.registerFactory(() => ExampleProvider(examoleRepo: sl()));
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();

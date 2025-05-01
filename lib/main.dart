@@ -10,7 +10,7 @@ void main() async {
   await di.init();
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (context) => di.sl<AuthProvider>()),
-    ChangeNotifierProvider(create: (context) => di.sl<ExamoleProvider>()),
+    ChangeNotifierProvider(create: (context) => di.sl<ExampleProvider>()),
   ], child: const MyApp()));
 }
 

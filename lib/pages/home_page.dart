@@ -10,7 +10,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  ExamoleProvider? examoleProvider;
+  ExampleProvider? examoleProvider;
   int _counter = 0;
 
   void _incrementCounter() {
@@ -25,7 +25,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    examoleProvider = Provider.of<ExamoleProvider>(context, listen: false);
+    examoleProvider = Provider.of<ExampleProvider>(context, listen: false);
     init();
     super.initState();
   }

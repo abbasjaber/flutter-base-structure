@@ -4,11 +4,11 @@ import 'package:app/remote/response/response_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 
-class ExamoleProvider extends ChangeNotifier {
+class ExampleProvider extends ChangeNotifier {
   ResponseModel? responseModel;
   ApiResponse? apiResponse;
   ExamoleRepo? examoleRepo;
-  ExamoleProvider({this.examoleRepo});
+  ExampleProvider({this.examoleRepo});
 
   Future<ResponseModel?> getItems() async {
     apiResponse = await examoleRepo!.get();
