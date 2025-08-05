@@ -31,17 +31,14 @@ class DioClient {
         'Content-Type': 'application/json; charset=UTF-8',
         'Authorization': 'Bearer $token'
       };
-    dio.interceptors.add(DioCacheInterceptor(
-        options: CacheOptions(
-      store: MemCacheStore(),
-      policy: CachePolicy.forceCache,
-      priority: CachePriority.high,
-      maxStale: const Duration(days: 1),
-      hitCacheOnErrorExcept: [401, 404],
-      keyBuilder: (request) {
-        return request.uri.toString();
-      },
-    )));
+
+    // dio.interceptors.add(DioCacheInterceptor(
+    //     options: CacheOptions(
+    //   store: MemCacheStore(),
+    //   policy: CachePolicy.forceCache,
+    //   priority: CachePriority.high,
+    //   maxStale: const Duration(days: 1),
+    // )));
     dio.interceptors.add(loggingInterceptor!);
   }
 
