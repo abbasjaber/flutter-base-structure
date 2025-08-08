@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:app/remote/constants/app_constants.dart';
 import 'package:app/remote/dio/dio_client.dart';
 import 'package:app/remote/exception/api_error_handler.dart';
@@ -22,7 +24,7 @@ class AuthRepo extends RepoAbstract {
   Future<ApiResponse> login(UserModel c) async {
     try {
       Response response = await dioClient.post(
-        BaseUrls.productionAPi + BaseUrls.login,
+        BaseUrls.login,
         data: c.toJson(),
       );
       return ApiResponse.withSuccess(response);
@@ -71,5 +73,26 @@ class AuthRepo extends RepoAbstract {
     } catch (e) {
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));
     }
+  }
+
+  Future<void> saveUserModel(UserModel userModel) async {
+    await sharedPreferences.setString(
+        AppConstants.userModel, jsonEncode(userModel.toJson()));
+  }
+
+  UserModel? getUserModel() {
+    final userModel = sharedPreferences.getString(AppConstants.userModel);
+    return userModel != null ? UserModel.fromJson(jsonDecode(userModel)) : null;
+  }
+
+  String? getLocale() {
+    var locale = sharedPreferences.getString(AppConstants.locale);
+    dioClient.dio.options.headers['Accept-Language'] = locale;
+    return locale;
+  }
+
+  setLocale(String locale) {
+    dioClient.dio.options.headers['Accept-Language'] = locale;
+    return sharedPreferences.setString(AppConstants.locale, locale);
   }
 }

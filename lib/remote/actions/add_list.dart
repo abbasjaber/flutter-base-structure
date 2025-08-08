@@ -5,7 +5,7 @@ abstract class AddListAbstract {
   ApiResponse? apiResponse;
   ResponseModel? responseModel;
   dynamic model;
-  List<dynamic>? _modelList = [];
+  List<dynamic>? _modelList;
   List<dynamic>? get modelList => _modelList;
 
   ResponseModel? addList() {

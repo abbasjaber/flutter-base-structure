@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:app/remote/models/user_model.dart';
 import 'package:app/remote/repositories/auth_repository.dart';
 import 'package:app/remote/response/api_response.dart';
@@ -24,6 +26,9 @@ class AuthProvider extends ChangeNotifier {
   ResponseModel? responseModel;
   ApiResponse? apiResponse;
 
+  UserModel? _userModel;
+  UserModel? get userModel => _userModel;
+
   Future<ResponseModel?> login(UserModel c) async {
     _isLoading = true;
     _loginErrorMessage = '';
@@ -31,9 +36,11 @@ class AuthProvider extends ChangeNotifier {
     apiResponse = await authRepo.login(c);
     if (apiResponse!.response != null &&
         apiResponse!.response!.statusCode == 200) {
-      Map map = apiResponse!.response!.data;
+      Map map = apiResponse!.response!.data['data'];
       String token = map["token"];
       authRepo.saveUserToken(token);
+      _userModel = UserModel.fromJson(map as Map<String, dynamic>);
+      authRepo.saveUserModel(_userModel!);
       responseModel = ResponseModel(true, 'Success');
     } else {
       _isLoading = false;
@@ -62,5 +69,19 @@ class AuthProvider extends ChangeNotifier {
     } else {
       return authRepo.logout();
     }
+  }
+
+  Future<void> getUserModel() async {
+    _userModel = authRepo.getUserModel();
+  }
+
+  getLocaleCountry() {
+    String locale = authRepo.getLocale() ?? Platform.localeName.split('_')[0];
+    authRepo.setLocale(locale);
+  }
+
+  setLocale(String locale) async {
+    authRepo.setLocale(locale);
+    notifyListeners();
   }
 }

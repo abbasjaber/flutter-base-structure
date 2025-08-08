@@ -3,23 +3,23 @@ class UserModel {
   String? name;
   String? email;
   String? password;
+  String? position;
+  String? username;
 
-  get getId => id;
-  set setId(id) => this.id = id;
-
-  get getName => name;
-
-  get getEmail => email;
-
-  get getPassword => password;
-
-  UserModel({this.id, this.name, this.email, this.password});
+  UserModel(
+      {this.id,
+      this.name,
+      this.email,
+      this.password,
+      this.position,
+      this.username});
 
   UserModel.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     name = json['name'];
     email = json['email'];
-    password = json['password'];
+    position = json['position'];
+    username = json['username'];
   }
 
   Map<String, dynamic> toJson() {
@@ -28,6 +28,9 @@ class UserModel {
     data['name'] = name;
     data['email'] = email;
     data['password'] = password;
+    data['position'] = position;
+    data['username'] = username;
+    data['confirm_password'] = password;
     return data;
   }
 }

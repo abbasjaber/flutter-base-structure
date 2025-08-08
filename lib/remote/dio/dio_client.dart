@@ -6,7 +6,6 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'logging_interceptor.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 
 class DioClient {
   late String baseUrl;
@@ -15,6 +14,7 @@ class DioClient {
 
   late Dio dio;
   String? token;
+  String? locale;
 
   DioClient(
     this.baseUrl,
@@ -23,13 +23,16 @@ class DioClient {
     this.sharedPreferences,
   }) {
     token = sharedPreferences?.getString(AppConstants.token);
+    locale = sharedPreferences?.getString(AppConstants.locale);
     dio = dioC;
     dio
       ..options.baseUrl = baseUrl
       ..httpClientAdapter
       ..options.headers = {
         'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token'
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+        'Accept-Language': locale
       };
 
     // dio.interceptors.add(DioCacheInterceptor(

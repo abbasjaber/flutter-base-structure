@@ -3,9 +3,9 @@ import 'package:app/remote/constants/config_model.dart';
 import 'package:app/remote/dio/dio_client.dart';
 import 'package:app/remote/dio/logging_interceptor.dart';
 import 'package:app/remote/providers/auth_provider.dart';
-import 'package:app/remote/providers/example_provider.dart';
+import 'package:app/remote/providers/employee_provider.dart';
 import 'package:app/remote/repositories/auth_repository.dart';
-import 'package:app/remote/repositories/example_repository.dart';
+import 'package:app/remote/repositories/employee_repository.dart';
 
 import 'package:dio/dio.dart';
 
@@ -25,11 +25,11 @@ Future<void> init() async {
   sl.registerLazySingleton(
       () => AuthRepo(dioClient: sl(), sharedPreferences: sl()));
 
-  sl.registerLazySingleton(() => ExamoleRepo(dioClient: sl()));
+  sl.registerLazySingleton(() => EmployeeRepo(dioClient: sl()));
 
   // Providers
   sl.registerFactory(() => AuthProvider(authRepo: sl()));
-  sl.registerFactory(() => ExampleProvider(examoleRepo: sl()));
+  sl.registerFactory(() => EmployeeProvider(employeeRepo: sl()));
 
   // External
   final sharedPreferences = await SharedPreferences.getInstance();

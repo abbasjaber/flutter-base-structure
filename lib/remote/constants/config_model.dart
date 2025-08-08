@@ -1,5 +1,5 @@
 class BaseUrls {
-  static const String baseAPi = "";
+  static const String baseAPi = "https://cms.primedealsa.com/api/";
 
   static const String localAPi = "";
 
@@ -14,4 +14,8 @@ class BaseUrls {
   //owner
   static const String register = 'register';
   static const String login = 'login';
+  static const String employee = 'employee';
+  static const String clients = 'clients';
+  static const String employeeClients = 'employee/clients';
+  static const String employeeHistory = 'employee/reports/list';
 }
