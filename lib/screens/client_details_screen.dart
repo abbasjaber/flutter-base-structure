@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:app/remote/providers/auth_provider.dart';
 
-class ClientDetailsScreen extends StatelessWidget {
+class ClientDetailsScreen extends StatefulWidget {
   final ClientModel client;
 
   const ClientDetailsScreen({
@@ -16,10 +16,36 @@ class ClientDetailsScreen extends StatelessWidget {
   });
 
   @override
+  State<ClientDetailsScreen> createState() => _ClientDetailsScreenState();
+}
+
+class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
+  final List<String> _selectedSalesOptions = [];
+  final TextEditingController _noteController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  void _clearSalesSelections() {
+    setState(() {
+      _selectedSalesOptions.clear();
+    });
+  }
+
+  void _clearNote() {
+    setState(() {
+      _noteController.clear();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CommonAppBar(
-        title: client.boardName ?? 'Client Details'.tr(),
+        title: widget.client.boardName ?? 'Client Details'.tr(),
         showMenu: false,
         actions: [
           IconButton(
@@ -30,195 +56,203 @@ class ClientDetailsScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            CachedNetworkImage(
-              imageUrl: client.crImage?.first ?? '',
-              placeholder: (context, url) => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              errorWidget: (context, url, error) => const Icon(Icons.error),
-            ),
-            // Header Card with Shop Info
-            _buildHeaderCard(),
-            const SizedBox(height: 16),
+      body: Form(
+        key: _formKey,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              widget.client.crImage?.isNotEmpty ?? false
+                  ? CachedNetworkImage(
+                      imageUrl: widget.client.crImage?.first ?? '',
+                      placeholder: (context, url) => const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      errorWidget: (context, url, error) =>
+                          const Icon(Icons.error),
+                    )
+                  : SizedBox.shrink(),
+              // Header Card with Shop Info
+              _buildHeaderCard(),
+              const SizedBox(height: 16),
 
-            // Contact Information
-            _buildSectionCard(
-              title: 'Contact Information'.tr(),
-              icon: Icons.contact_phone,
-              children: [
-                if (client.ownerName != null)
-                  _buildInfoTile(
-                    icon: Icons.person,
-                    title: 'Owner'.tr(),
-                    subtitle: client.ownerName!,
-                    trailing: client.ownerPhone != null
-                        ? IconButton(
-                            icon: const Icon(Icons.phone),
-                            onPressed: () {
-                              // TODO: Make phone call
-                            },
-                          )
-                        : null,
-                  ),
-                if (client.managerName != null)
-                  _buildInfoTile(
-                    icon: Icons.manage_accounts,
-                    title: 'Manager'.tr(),
-                    subtitle: client.managerName!,
-                    trailing: client.managerPhone != null
-                        ? IconButton(
-                            icon: const Icon(Icons.phone),
-                            onPressed: () {
-                              // TODO: Make phone call
-                            },
-                          )
-                        : null,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Business Information
-            _buildSectionCard(
-              title: 'Business Information'.tr(),
-              icon: Icons.business,
-              children: [
-                if (client.shopCode != null)
-                  _buildInfoTile(
-                    icon: Icons.qr_code,
-                    title: 'Shop Code'.tr(),
-                    subtitle: client.shopCode!,
-                  ),
-                if (client.vatNumber != null)
-                  _buildInfoTile(
-                    icon: Icons.receipt,
-                    title: 'VAT Number'.tr(),
-                    subtitle: client.vatNumber.toString(),
-                  ),
-                if (client.shopSalesClassification != null)
-                  _buildInfoTile(
-                    icon: Icons.analytics,
-                    title: 'Sales Classification'.tr(),
-                    subtitle: client.shopSalesClassification!,
-                  ),
-                if (client.shopDecoration != null)
-                  _buildInfoTile(
-                    icon: Icons.storefront,
-                    title: 'Shop Decoration'.tr(),
-                    subtitle: client.shopDecoration!,
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Location Information
-            _buildSectionCard(
-              title: 'Location'.tr(),
-              icon: Icons.location_on,
-              children: [
-                if (client.neighborhood != null)
-                  _buildInfoTile(
-                    icon: Icons.location_city,
-                    title: 'Neighborhood'.tr(),
-                    subtitle: client.neighborhood!,
-                  ),
-                if (client.cityName != null)
-                  _buildInfoTile(
-                    icon: Icons.location_city,
-                    title: 'City'.tr(),
-                    subtitle: client.cityName!,
-                  ),
-                if (client.subcityName != null)
-                  _buildInfoTile(
-                    icon: Icons.location_city,
-                    title: 'Subcity'.tr(),
-                    subtitle: client.subcityName!,
-                  ),
-                if (client.regionName != null)
-                  _buildInfoTile(
-                    icon: Icons.map,
-                    title: 'Region'.tr(),
-                    subtitle: client.regionName!,
-                  ),
-                if (client.latitude != null && client.longitude != null)
-                  _buildInfoTile(
-                    icon: Icons.gps_fixed,
-                    title: 'Coordinates'.tr(),
-                    subtitle: '${client.latitude}, ${client.longitude}',
-                    trailing: IconButton(
-                      icon: const Icon(Icons.map),
-                      onPressed: () {
-                        // TODO: Open in maps
-                      },
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            // Chain Information
-            if (client.chainName != null) ...[
+              // Contact Information
               _buildSectionCard(
-                title: 'Chain Information'.tr(),
-                icon: Icons.account_tree,
+                title: 'Contact Information'.tr(),
+                icon: Icons.contact_phone,
                 children: [
-                  _buildInfoTile(
-                    icon: Icons.business_center,
-                    title: 'Chain Name'.tr(),
-                    subtitle: client.chainName!,
-                  ),
+                  if (widget.client.ownerName != null)
+                    _buildInfoTile(
+                      icon: Icons.person,
+                      title: 'Owner'.tr(),
+                      subtitle: widget.client.ownerName!,
+                      trailing: widget.client.ownerPhone != null
+                          ? IconButton(
+                              icon: const Icon(Icons.phone),
+                              onPressed: () {
+                                // TODO: Make phone call
+                              },
+                            )
+                          : null,
+                    ),
+                  if (widget.client.managerName != null)
+                    _buildInfoTile(
+                      icon: Icons.manage_accounts,
+                      title: 'Manager'.tr(),
+                      subtitle: widget.client.managerName!,
+                      trailing: widget.client.managerPhone != null
+                          ? IconButton(
+                              icon: const Icon(Icons.phone),
+                              onPressed: () {
+                                // TODO: Make phone call
+                              },
+                            )
+                          : null,
+                    ),
                 ],
               ),
               const SizedBox(height: 16),
-            ],
 
-            // Documents Section
-            _buildSectionCard(
-              title: 'Documents'.tr(),
-              icon: Icons.description,
-              children: [
-                if (client.crImage != null && client.crImage!.isNotEmpty)
-                  _buildDocumentTile(
-                    icon: Icons.description,
-                    title: 'CR Documents'.tr(),
-                    count: client.crImage!.length,
-                    onTap: () {
-                      // TODO: View CR documents
-                    },
-                  ),
-                if (client.boardImage != null && client.boardImage!.isNotEmpty)
-                  _buildDocumentTile(
-                    icon: Icons.image,
-                    title: 'Board Images'.tr(),
-                    count: client.boardImage!.length,
-                    onTap: () {
-                      // TODO: View board images
-                    },
-                  ),
+              // Business Information
+              _buildSectionCard(
+                title: 'Business Information'.tr(),
+                icon: Icons.business,
+                children: [
+                  if (widget.client.shopCode != null)
+                    _buildInfoTile(
+                      icon: Icons.qr_code,
+                      title: 'Shop Code'.tr(),
+                      subtitle: widget.client.shopCode!,
+                    ),
+                  if (widget.client.vatNumber != null)
+                    _buildInfoTile(
+                      icon: Icons.receipt,
+                      title: 'VAT Number'.tr(),
+                      subtitle: widget.client.vatNumber.toString(),
+                    ),
+                  if (widget.client.shopSalesClassification != null)
+                    _buildInfoTile(
+                      icon: Icons.analytics,
+                      title: 'Sales Classification'.tr(),
+                      subtitle: widget.client.shopSalesClassification!,
+                    ),
+                  if (widget.client.shopDecoration != null)
+                    _buildInfoTile(
+                      icon: Icons.storefront,
+                      title: 'Shop Decoration'.tr(),
+                      subtitle: widget.client.shopDecoration!,
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Location Information
+              _buildSectionCard(
+                title: 'Location'.tr(),
+                icon: Icons.location_on,
+                children: [
+                  if (widget.client.neighborhood != null)
+                    _buildInfoTile(
+                      icon: Icons.location_city,
+                      title: 'Neighborhood'.tr(),
+                      subtitle: widget.client.neighborhood!,
+                    ),
+                  if (widget.client.cityName != null)
+                    _buildInfoTile(
+                      icon: Icons.location_city,
+                      title: 'City'.tr(),
+                      subtitle: widget.client.cityName!,
+                    ),
+                  if (widget.client.subcityName != null)
+                    _buildInfoTile(
+                      icon: Icons.location_city,
+                      title: 'Subcity'.tr(),
+                      subtitle: widget.client.subcityName!,
+                    ),
+                  if (widget.client.regionName != null)
+                    _buildInfoTile(
+                      icon: Icons.map,
+                      title: 'Region'.tr(),
+                      subtitle: widget.client.regionName!,
+                    ),
+                  if (widget.client.latitude != null &&
+                      widget.client.longitude != null)
+                    _buildInfoTile(
+                      icon: Icons.gps_fixed,
+                      title: 'Coordinates'.tr(),
+                      subtitle:
+                          '${widget.client.latitude}, ${widget.client.longitude}',
+                      trailing: IconButton(
+                        icon: const Icon(Icons.map),
+                        onPressed: () {
+                          // TODO: Open in maps
+                        },
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Chain Information
+              if (widget.client.chainName != null) ...[
+                _buildSectionCard(
+                  title: 'Chain Information'.tr(),
+                  icon: Icons.account_tree,
+                  children: [
+                    _buildInfoTile(
+                      icon: Icons.business_center,
+                      title: 'Chain Name'.tr(),
+                      subtitle: widget.client.chainName!,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
               ],
-            ),
-            const SizedBox(height: 32),
 
-            // Position-specific Action Buttons
-            Consumer<AuthProvider>(
-              builder: (context, authProvider, child) {
-                final userPosition = authProvider.userModel?.position;
+              // // Documents Section
+              // _buildSectionCard(
+              //   title: 'Documents'.tr(),
+              //   icon: Icons.description,
+              //   children: [
+              //     if (client.crImage != null && client.crImage!.isNotEmpty)
+              //       _buildDocumentTile(
+              //         icon: Icons.description,
+              //         title: 'CR Documents'.tr(),
+              //         count: client.crImage!.length,
+              //         onTap: () {
+              //           // TODO: View CR documents
+              //         },
+              //       ),
+              //     if (client.boardImage != null && client.boardImage!.isNotEmpty)
+              //       _buildDocumentTile(
+              //         icon: Icons.image,
+              //         title: 'Board Images'.tr(),
+              //         count: client.boardImage!.length,
+              //         onTap: () {
+              //           // TODO: View board images
+              //         },
+              //       ),
+              //   ],
+              // ),
+              // const SizedBox(height: 32),
 
-                if (userPosition == 'TMR') {
-                  return _buildTmrActions(context);
-                } else if (userPosition == 'Sales') {
-                  return _buildSalesActions(context);
-                } else {
-                  return _buildDefaultActions(context);
-                }
-              },
-            ),
-          ],
+              // Position-specific Action Buttons
+              Consumer<AuthProvider>(
+                builder: (context, authProvider, child) {
+                  final userPosition = authProvider.userModel?.position;
+
+                  if (userPosition == 'TMR') {
+                    return _buildTmrActions(context);
+                  } else if (userPosition == 'Sales') {
+                    return _buildSalesActions(context);
+                  } else {
+                    return _buildDefaultActions(context);
+                  }
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -229,7 +263,7 @@ class ClientDetailsScreen extends StatelessWidget {
       children: [
         // Photo Upload Section
         _buildSectionCard(
-          title: 'Upload Photo'.tr(),
+          title: 'Upload Photos'.tr(),
           icon: Icons.camera_alt,
           children: [
             Container(
@@ -249,7 +283,7 @@ class ClientDetailsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Tap to add photo'.tr(),
+                    'Tap to add photos'.tr(),
                     style: TextStyle(
                       color: PrimeColors.lightGray,
                       fontSize: 14,
@@ -259,11 +293,26 @@ class ClientDetailsScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            TextField(
+            TextFormField(
+              controller: _noteController,
               maxLines: 3,
+              keyboardType: TextInputType.multiline,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your notes'.tr();
+                }
+                return null;
+              },
+              onChanged: (value) {
+                setState(() {});
+              },
               decoration: InputDecoration(
                 labelText: 'Add Note'.tr(),
                 hintText: 'Enter your notes here...'.tr(),
+                hintStyle: TextStyle(
+                  color: PrimeColors.lightGray,
+                  fontSize: 14,
+                ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
@@ -279,18 +328,111 @@ class ClientDetailsScreen extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton.icon(
-                onPressed: () {
-                  // TODO: Handle photo upload with note
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Photo uploaded successfully!'),
-                      backgroundColor: PrimeColors.primaryRed,
-                    ),
-                  );
-                },
+                onPressed: _noteController.text.isNotEmpty
+                    ? () {
+                        // TODO: Handle photo upload with note
+                        final note = _noteController.text.trim();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(note.isNotEmpty
+                                ? 'Photos uploaded with note: $note'
+                                : 'Photos uploaded successfully!'),
+                            backgroundColor: PrimeColors.primaryRed,
+                          ),
+                        );
+                        _clearNote();
+                      }
+                    : null,
                 icon: const Icon(Icons.upload),
                 label: Text(
-                  'Upload Photo & Note'.tr(),
+                  'Upload Photos & Note'.tr(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSalesActions(BuildContext context) {
+    return Column(
+      children: [
+        // Sales Options Section
+        _buildSectionCard(
+          title: 'Select Activity Type'.tr(),
+          icon: Icons.checklist,
+          children: [
+            _buildCheckboxTile(
+              title: 'Socialization'.tr(),
+              subtitle: 'Client relationship building'.tr(),
+              icon: Icons.people,
+              value: _selectedSalesOptions.contains('socialization'),
+              onChanged: (value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedSalesOptions.add('socialization');
+                  } else {
+                    _selectedSalesOptions.remove('socialization');
+                  }
+                });
+              },
+            ),
+            _buildCheckboxTile(
+              title: 'Sales'.tr(),
+              subtitle: 'Product sales activities'.tr(),
+              icon: Icons.shopping_cart,
+              value: _selectedSalesOptions.contains('sales'),
+              onChanged: (value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedSalesOptions.add('sales');
+                  } else {
+                    _selectedSalesOptions.remove('sales');
+                  }
+                });
+              },
+            ),
+            _buildCheckboxTile(
+              title: 'Collection'.tr(),
+              subtitle: 'Payment collection'.tr(),
+              icon: Icons.payment,
+              value: _selectedSalesOptions.contains('collection'),
+              onChanged: (value) {
+                setState(() {
+                  if (value == true) {
+                    _selectedSalesOptions.add('collection');
+                  } else {
+                    _selectedSalesOptions.remove('collection');
+                  }
+                });
+              },
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton.icon(
+                onPressed: _selectedSalesOptions.isEmpty
+                    ? null
+                    : () {
+                        // TODO: Handle sales activity submission
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                'Activities submitted: ${_selectedSalesOptions.join(', ')}'),
+                            backgroundColor: PrimeColors.primaryRed,
+                          ),
+                        );
+                        _clearSalesSelections();
+                      },
+                icon: const Icon(Icons.check),
+                label: Text(
+                  'Submit'.tr(),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -301,98 +443,7 @@ class ClientDetailsScreen extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        _buildDefaultActions(context),
       ],
-    );
-  }
-
-  Widget _buildSalesActions(BuildContext context) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        final List<String> selectedOptions = [];
-
-        return Column(
-          children: [
-            // Sales Options Section
-            _buildSectionCard(
-              title: 'Select Activity Type'.tr(),
-              icon: Icons.checklist,
-              children: [
-                _buildCheckboxTile(
-                  title: 'Socialization'.tr(),
-                  subtitle: 'Client relationship building'.tr(),
-                  icon: Icons.people,
-                  onChanged: (value) {
-                    setState(() {
-                      if (value == true) {
-                        selectedOptions.add('socialization');
-                      } else {
-                        selectedOptions.remove('socialization');
-                      }
-                    });
-                  },
-                ),
-                _buildCheckboxTile(
-                  title: 'Sales'.tr(),
-                  subtitle: 'Product sales activities'.tr(),
-                  icon: Icons.shopping_cart,
-                  onChanged: (value) {
-                    setState(() {
-                      if (value == true) {
-                        selectedOptions.add('sales');
-                      } else {
-                        selectedOptions.remove('sales');
-                      }
-                    });
-                  },
-                ),
-                _buildCheckboxTile(
-                  title: 'Collection'.tr(),
-                  subtitle: 'Payment collection'.tr(),
-                  icon: Icons.payment,
-                  onChanged: (value) {
-                    setState(() {
-                      if (value == true) {
-                        selectedOptions.add('collection');
-                      } else {
-                        selectedOptions.remove('collection');
-                      }
-                    });
-                  },
-                ),
-                const SizedBox(height: 16),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton.icon(
-                    onPressed: selectedOptions.isEmpty
-                        ? null
-                        : () {
-                            // TODO: Handle sales activity submission
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                    'Activities submitted: ${selectedOptions.join(', ')}'),
-                                backgroundColor: PrimeColors.primaryRed,
-                              ),
-                            );
-                          },
-                    icon: const Icon(Icons.check),
-                    label: Text(
-                      'Submit Activities'.tr(),
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-          ],
-        );
-      },
     );
   }
 
@@ -446,6 +497,7 @@ class ClientDetailsScreen extends StatelessWidget {
     required String title,
     required String subtitle,
     required IconData icon,
+    required bool value,
     required ValueChanged<bool?> onChanged,
   }) {
     return Padding(
@@ -516,7 +568,7 @@ class ClientDetailsScreen extends StatelessWidget {
               ),
             ),
             Checkbox(
-              value: false, // This will be managed by StatefulBuilder
+              value: value,
               onChanged: onChanged,
               activeColor: PrimeColors.primaryRed,
             ),
@@ -571,7 +623,7 @@ class ClientDetailsScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              client.boardName ?? 'Unknown Shop'.tr(),
+              widget.client.boardName ?? 'Unknown Shop'.tr(),
               style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -579,10 +631,10 @@ class ClientDetailsScreen extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            if (client.shopCode != null) ...[
+            if (widget.client.shopCode != null) ...[
               const SizedBox(height: 8),
               Text(
-                'Code: ${client.shopCode}'.tr(),
+                'Code: ${widget.client.shopCode}'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   color: PrimeColors.pureWhite.withValues(alpha: 0.8),

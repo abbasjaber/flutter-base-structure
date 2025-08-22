@@ -36,15 +36,13 @@ class _MainPageState extends State<MainPage> {
       body: widget.child,
       floatingActionButton: _shouldShowFAB(context)
           ? CommonFloatingActionButton(
-              label: isTmrUser ? 'New Visit'.tr() : 'New Sales'.tr(),
+              label: 'New Visit'.tr(),
               icon: Icons.add,
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      isTmrUser
-                          ? 'Add new client or start visit'.tr()
-                          : 'Add new client or start sales activity'.tr(),
+                      'Add new client or start visit'.tr(),
                     ),
                     backgroundColor: PrimeColors.primaryRed,
                   ),

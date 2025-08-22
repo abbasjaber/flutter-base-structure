@@ -180,14 +180,17 @@ class _TmrHomeScreenState extends State<TmrHomeScreen> {
                                   width: 1,
                                 ),
                               ),
-                              child: CachedNetworkImage(
-                                imageUrl: client.crImage?.first ?? '',
-                                placeholder: (context, url) => const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                                errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error),
-                              ),
+                              child: client.crImage?.isNotEmpty ?? false
+                                  ? CachedNetworkImage(
+                                      imageUrl: client.crImage?.first ?? '',
+                                      placeholder: (context, url) =>
+                                          const Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          const Icon(Icons.error),
+                                    )
+                                  : const Icon(Icons.store),
                             ),
                             const SizedBox(width: 16),
 
