@@ -89,6 +89,8 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.text,
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: InputDecoration(
                   labelText: 'username'.tr(),
                   prefixIcon: Icon(Icons.person_rounded),
@@ -108,6 +110,8 @@ class _LoginScreenState extends State<LoginScreen> {
               TextFormField(
                 controller: _passwordController,
                 obscureText: !_isPasswordVisible,
+                autocorrect: false,
+                enableSuggestions: false,
                 decoration: InputDecoration(
                   labelText: 'Password'.tr(),
                   prefixIcon: const Icon(Icons.lock_outlined),

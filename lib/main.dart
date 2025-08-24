@@ -89,7 +89,7 @@ class _MyAppState extends State<MyApp> {
                   if (authProvider.userModel != null) {
                     return const HomeScreen();
                   }
-                  return const LoginScreen();
+                  return const NotFoundWidget();
                 },
                 redirect: (context, state) {
                   final authProvider =
@@ -142,4 +142,42 @@ class _MyAppState extends State<MyApp> {
       ),
     );
   }
+}
+
+class NotFoundWidget extends StatelessWidget {
+  const NotFoundWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: Text(
+              'Not Found',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              context.go('/login');
+            },
+            child: Text('Login'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+Page getPage({
+  required Widget child,
+  required GoRouterState state,
+}) {
+  return MaterialPage(
+    key: state.pageKey,
+    child: child,
+  );
 }

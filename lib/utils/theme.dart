@@ -6,6 +6,7 @@ class PrimeColors {
   static const Color primaryRed = Color(0xFFB50612); // #b50612
   static const Color pureBlack = Color(0xFF000000); // #000000
   static const Color pureWhite = Color(0xFFFFFFFF); // #FFFFFF
+  static const Color successGreen = Color(0xFF008000); // #008000
 
   // Secondary Colors - Grayscale/Neutral
   static const Color lightGray = Color(0xFFB2B2B2); // #B2B2B2

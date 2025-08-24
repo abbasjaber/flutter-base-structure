@@ -1,8 +1,11 @@
 import 'package:app/remote/providers/auth_provider.dart';
+import 'package:app/remote/providers/employee_provider.dart';
 import 'package:app/utils/theme.dart';
 import 'package:app/utils/common_widgets.dart';
+import 'package:barcode_scan2/platform_wrapper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -19,17 +22,19 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late AuthProvider _authProvider;
+  AuthProvider? _authProvider;
+  EmployeeProvider? _employeeProvider;
 
   @override
   void initState() {
     super.initState();
     _authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _employeeProvider = Provider.of<EmployeeProvider>(context, listen: false);
   }
 
   @override
   Widget build(BuildContext context) {
-    final userPosition = _authProvider.userModel?.position;
+    final userPosition = _authProvider?.userModel?.position;
     final isTmrUser = userPosition == 'TMR';
 
     return Scaffold(
@@ -38,15 +43,57 @@ class _MainPageState extends State<MainPage> {
           ? CommonFloatingActionButton(
               label: 'New Visit'.tr(),
               icon: Icons.add,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'Add new client or start visit'.tr(),
+              onPressed: () async {
+                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                final isGranted = await Geolocator.requestPermission();
+                if (isGranted == LocationPermission.denied) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Location permissions are denied'.tr(),
+                      ),
+                      backgroundColor: PrimeColors.primaryRed,
                     ),
-                    backgroundColor: PrimeColors.primaryRed,
-                  ),
-                );
+                  );
+                  return;
+                }
+                if (isGranted == LocationPermission.deniedForever) {
+                  scaffoldMessenger.showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Location permissions are denied forever'.tr(),
+                      ),
+                      backgroundColor: PrimeColors.primaryRed,
+                    ),
+                  );
+                  return;
+                }
+
+                BarcodeScanner.scan().then((result) {
+                  if (result.rawContent.isNotEmpty) {
+                    _employeeProvider
+                        ?.startVisit(
+                      result.rawContent,
+                    )
+                        .then((value) {
+                      if (value?.isSuccess == true) {
+                        if (context.mounted) {
+                          context.go('/client-details',
+                              extra: _employeeProvider?.client);
+                        }
+                      } else {
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              value?.message ?? '',
+                            ),
+                            backgroundColor: PrimeColors.primaryRed,
+                          ),
+                        );
+                      }
+                    });
+                  }
+                });
               },
             )
           : null,

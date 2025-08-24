@@ -1,11 +1,15 @@
 import 'package:app/remote/models/client_model.dart';
+import 'package:app/remote/providers/employee_provider.dart';
 import 'package:app/utils/theme.dart';
 import 'package:app/utils/common_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:multiple_image_camera/multiple_image_camera.dart';
 import 'package:provider/provider.dart';
 import 'package:app/remote/providers/auth_provider.dart';
+import 'dart:io';
 
 class ClientDetailsScreen extends StatefulWidget {
   final ClientModel client;
@@ -29,6 +33,26 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
     super.dispose();
   }
 
+  List<String> selectedImages = [];
+  final picker = ImagePicker();
+  Future getImages() async {
+    MultipleImageCamera.capture(context: context).then((finalImages) async {
+      selectedImages = [];
+      if (finalImages.isNotEmpty) {
+        for (var images in finalImages) {
+          selectedImages.add(images.file.path);
+        }
+        setState(() {});
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              duration: Duration(milliseconds: 500),
+              content: Text('Nothing is selected')));
+        }
+      }
+    });
+  }
+
   void _clearSalesSelections() {
     setState(() {
       _selectedSalesOptions.clear();
@@ -44,218 +68,233 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CommonAppBar(
-        title: widget.client.boardName ?? 'Client Details'.tr(),
-        showMenu: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () {
-              // TODO: Navigate to edit client screen
-            },
-          ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              widget.client.crImage?.isNotEmpty ?? false
-                  ? CachedNetworkImage(
-                      imageUrl: widget.client.crImage?.first ?? '',
-                      placeholder: (context, url) => const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      errorWidget: (context, url, error) =>
-                          const Icon(Icons.error),
-                    )
-                  : SizedBox.shrink(),
-              // Header Card with Shop Info
-              _buildHeaderCard(),
-              const SizedBox(height: 16),
-
-              // Contact Information
-              _buildSectionCard(
-                title: 'Contact Information'.tr(),
-                icon: Icons.contact_phone,
-                children: [
-                  if (widget.client.ownerName != null)
-                    _buildInfoTile(
-                      icon: Icons.person,
-                      title: 'Owner'.tr(),
-                      subtitle: widget.client.ownerName!,
-                      trailing: widget.client.ownerPhone != null
-                          ? IconButton(
-                              icon: const Icon(Icons.phone),
-                              onPressed: () {
-                                // TODO: Make phone call
-                              },
-                            )
-                          : null,
-                    ),
-                  if (widget.client.managerName != null)
-                    _buildInfoTile(
-                      icon: Icons.manage_accounts,
-                      title: 'Manager'.tr(),
-                      subtitle: widget.client.managerName!,
-                      trailing: widget.client.managerPhone != null
-                          ? IconButton(
-                              icon: const Icon(Icons.phone),
-                              onPressed: () {
-                                // TODO: Make phone call
-                              },
-                            )
-                          : null,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Business Information
-              _buildSectionCard(
-                title: 'Business Information'.tr(),
-                icon: Icons.business,
-                children: [
-                  if (widget.client.shopCode != null)
-                    _buildInfoTile(
-                      icon: Icons.qr_code,
-                      title: 'Shop Code'.tr(),
-                      subtitle: widget.client.shopCode!,
-                    ),
-                  if (widget.client.vatNumber != null)
-                    _buildInfoTile(
-                      icon: Icons.receipt,
-                      title: 'VAT Number'.tr(),
-                      subtitle: widget.client.vatNumber.toString(),
-                    ),
-                  if (widget.client.shopSalesClassification != null)
-                    _buildInfoTile(
-                      icon: Icons.analytics,
-                      title: 'Sales Classification'.tr(),
-                      subtitle: widget.client.shopSalesClassification!,
-                    ),
-                  if (widget.client.shopDecoration != null)
-                    _buildInfoTile(
-                      icon: Icons.storefront,
-                      title: 'Shop Decoration'.tr(),
-                      subtitle: widget.client.shopDecoration!,
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Location Information
-              _buildSectionCard(
-                title: 'Location'.tr(),
-                icon: Icons.location_on,
-                children: [
-                  if (widget.client.neighborhood != null)
-                    _buildInfoTile(
-                      icon: Icons.location_city,
-                      title: 'Neighborhood'.tr(),
-                      subtitle: widget.client.neighborhood!,
-                    ),
-                  if (widget.client.cityName != null)
-                    _buildInfoTile(
-                      icon: Icons.location_city,
-                      title: 'City'.tr(),
-                      subtitle: widget.client.cityName!,
-                    ),
-                  if (widget.client.subcityName != null)
-                    _buildInfoTile(
-                      icon: Icons.location_city,
-                      title: 'Subcity'.tr(),
-                      subtitle: widget.client.subcityName!,
-                    ),
-                  if (widget.client.regionName != null)
-                    _buildInfoTile(
-                      icon: Icons.map,
-                      title: 'Region'.tr(),
-                      subtitle: widget.client.regionName!,
-                    ),
-                  if (widget.client.latitude != null &&
-                      widget.client.longitude != null)
-                    _buildInfoTile(
-                      icon: Icons.gps_fixed,
-                      title: 'Coordinates'.tr(),
-                      subtitle:
-                          '${widget.client.latitude}, ${widget.client.longitude}',
-                      trailing: IconButton(
-                        icon: const Icon(Icons.map),
-                        onPressed: () {
-                          // TODO: Open in maps
-                        },
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Chain Information
-              if (widget.client.chainName != null) ...[
-                _buildSectionCard(
-                  title: 'Chain Information'.tr(),
-                  icon: Icons.account_tree,
-                  children: [
-                    _buildInfoTile(
-                      icon: Icons.business_center,
-                      title: 'Chain Name'.tr(),
-                      subtitle: widget.client.chainName!,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // // Documents Section
-              // _buildSectionCard(
-              //   title: 'Documents'.tr(),
-              //   icon: Icons.description,
-              //   children: [
-              //     if (client.crImage != null && client.crImage!.isNotEmpty)
-              //       _buildDocumentTile(
-              //         icon: Icons.description,
-              //         title: 'CR Documents'.tr(),
-              //         count: client.crImage!.length,
-              //         onTap: () {
-              //           // TODO: View CR documents
-              //         },
-              //       ),
-              //     if (client.boardImage != null && client.boardImage!.isNotEmpty)
-              //       _buildDocumentTile(
-              //         icon: Icons.image,
-              //         title: 'Board Images'.tr(),
-              //         count: client.boardImage!.length,
-              //         onTap: () {
-              //           // TODO: View board images
-              //         },
-              //       ),
-              //   ],
-              // ),
-              // const SizedBox(height: 32),
-
-              // Position-specific Action Buttons
-              Consumer<AuthProvider>(
-                builder: (context, authProvider, child) {
-                  final userPosition = authProvider.userModel?.position;
-
-                  if (userPosition == 'TMR') {
-                    return _buildTmrActions(context);
-                  } else if (userPosition == 'Sales') {
-                    return _buildSalesActions(context);
-                  } else {
-                    return _buildDefaultActions(context);
-                  }
-                },
-              ),
-            ],
-          ),
+        appBar: CommonAppBar(
+          title: widget.client.boardName ?? 'Client Details'.tr(),
+          showMenu: false,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.edit),
+              onPressed: () {
+                // TODO: Navigate to edit client screen
+              },
+            ),
+          ],
         ),
-      ),
-    );
+        body: Form(
+          key: _formKey,
+          child: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  PrimeColors.pureWhite,
+                  PrimeColors.lightGray.withOpacity(0.05),
+                ],
+              ),
+            ),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Client Image Section
+                  if (widget.client.boardImage?.isNotEmpty ?? false)
+                    Container(
+                      width: double.infinity,
+                      height: 200,
+                      margin: const EdgeInsets.only(bottom: 24),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: PrimeColors.pureBlack.withOpacity(0.1),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.client.boardImage?.first ?? '',
+                          placeholder: (context, url) => Container(
+                            color: PrimeColors.lightGray.withOpacity(0.3),
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                color: PrimeColors.primaryRed,
+                              ),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            color: PrimeColors.lightGray.withOpacity(0.3),
+                            child: const Icon(
+                              Icons.error_outline,
+                              size: 48,
+                              color: PrimeColors.lightGray,
+                            ),
+                          ),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+
+                  // Header Card with Shop Info
+                  _buildHeaderCard(),
+                  const SizedBox(height: 24),
+
+                  // Contact Information
+                  _buildSectionCard(
+                    title: 'Contact Information'.tr(),
+                    icon: Icons.contact_phone,
+                    children: [
+                      if (widget.client.ownerName != null)
+                        _buildInfoTile(
+                          icon: Icons.person,
+                          title: 'Owner'.tr(),
+                          subtitle: widget.client.ownerName!,
+                          trailing: widget.client.ownerPhone != null
+                              ? IconButton(
+                                  icon: const Icon(Icons.phone),
+                                  onPressed: () {
+                                    // TODO: Make phone call
+                                  },
+                                )
+                              : null,
+                        ),
+                      if (widget.client.managerName != null)
+                        _buildInfoTile(
+                          icon: Icons.manage_accounts,
+                          title: 'Manager'.tr(),
+                          subtitle: widget.client.managerName!,
+                          trailing: widget.client.managerPhone != null
+                              ? IconButton(
+                                  icon: const Icon(Icons.phone),
+                                  onPressed: () {
+                                    // TODO: Make phone call
+                                  },
+                                )
+                              : null,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Business Information
+                  _buildSectionCard(
+                    title: 'Business Information'.tr(),
+                    icon: Icons.business,
+                    children: [
+                      if (widget.client.shopCode != null)
+                        _buildInfoTile(
+                          icon: Icons.qr_code,
+                          title: 'Shop Code'.tr(),
+                          subtitle: widget.client.shopCode!,
+                        ),
+                      if (widget.client.vatNumber != null)
+                        _buildInfoTile(
+                          icon: Icons.receipt,
+                          title: 'VAT Number'.tr(),
+                          subtitle: widget.client.vatNumber.toString(),
+                        ),
+                      if (widget.client.shopSalesClassification != null)
+                        _buildInfoTile(
+                          icon: Icons.analytics,
+                          title: 'Sales Classification'.tr(),
+                          subtitle: widget.client.shopSalesClassification!,
+                        ),
+                      if (widget.client.shopDecoration != null)
+                        _buildInfoTile(
+                          icon: Icons.storefront,
+                          title: 'Shop Decoration'.tr(),
+                          subtitle: widget.client.shopDecoration!,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Location Information
+                  _buildSectionCard(
+                    title: 'Location'.tr(),
+                    icon: Icons.location_on,
+                    children: [
+                      if (widget.client.neighborhood != null)
+                        _buildInfoTile(
+                          icon: Icons.location_city,
+                          title: 'Neighborhood'.tr(),
+                          subtitle: widget.client.neighborhood!,
+                        ),
+                      if (widget.client.cityName != null)
+                        _buildInfoTile(
+                          icon: Icons.location_city,
+                          title: 'City'.tr(),
+                          subtitle: widget.client.cityName!,
+                        ),
+                      if (widget.client.subcityName != null)
+                        _buildInfoTile(
+                          icon: Icons.location_city,
+                          title: 'Subcity'.tr(),
+                          subtitle: widget.client.subcityName!,
+                        ),
+                      if (widget.client.regionName != null)
+                        _buildInfoTile(
+                          icon: Icons.map,
+                          title: 'Region'.tr(),
+                          subtitle: widget.client.regionName!,
+                        ),
+                      if (widget.client.latitude != null &&
+                          widget.client.longitude != null)
+                        _buildInfoTile(
+                          icon: Icons.gps_fixed,
+                          title: 'Coordinates'.tr(),
+                          subtitle:
+                              '${widget.client.latitude}, ${widget.client.longitude}',
+                          trailing: IconButton(
+                            icon: const Icon(Icons.map),
+                            onPressed: () {
+                              // TODO: Open in maps
+                            },
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Chain Information
+                  if (widget.client.chainName != null) ...[
+                    _buildSectionCard(
+                      title: 'Chain Information'.tr(),
+                      icon: Icons.account_tree,
+                      children: [
+                        _buildInfoTile(
+                          icon: Icons.business_center,
+                          title: 'Chain Name'.tr(),
+                          subtitle: widget.client.chainName!,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+
+                  // Position-specific Action Buttons
+                  Consumer<AuthProvider>(
+                    builder: (context, authProvider, child) {
+                      final userPosition = authProvider.userModel?.position;
+
+                      if (userPosition == 'TMR') {
+                        return _buildTmrActions(context);
+                      } else if (userPosition == 'Sales') {
+                        return _buildSalesActions(context);
+                      } else {
+                        return _buildDefaultActions(context);
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ));
   }
 
   Widget _buildTmrActions(BuildContext context) {
@@ -268,90 +307,291 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
           children: [
             Container(
               width: double.infinity,
-              height: 120,
               decoration: BoxDecoration(
-                border: Border.all(color: PrimeColors.lightGray),
-                borderRadius: BorderRadius.circular(8),
+                border:
+                    Border.all(color: PrimeColors.lightGray.withOpacity(0.3)),
+                borderRadius: BorderRadius.circular(12),
+                color: PrimeColors.pureWhite,
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.add_a_photo,
-                    size: 40,
-                    color: PrimeColors.lightGray,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Tap to add photos'.tr(),
-                    style: TextStyle(
-                      color: PrimeColors.lightGray,
-                      fontSize: 14,
+                  // Image Grid
+                  if (selectedImages.isNotEmpty) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      child: GridView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.0,
+                        ),
+                        itemCount: selectedImages.length,
+                        itemBuilder: (context, index) {
+                          final image = selectedImages[index];
+                          return Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: PrimeColors.pureBlack.withOpacity(0.1),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Stack(
+                                children: [
+                                  Image.file(
+                                    File(image),
+                                    width: double.infinity,
+                                    height: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  // Delete button overlay
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: PrimeColors.primaryRed
+                                            .withOpacity(0.9),
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: PrimeColors.pureBlack
+                                                .withOpacity(0.2),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: IconButton(
+                                        icon: const Icon(
+                                          Icons.close,
+                                          color: PrimeColors.pureWhite,
+                                          size: 18,
+                                        ),
+                                        onPressed: () {
+                                          setState(() {
+                                            selectedImages.remove(image);
+                                          });
+                                        },
+                                        constraints: const BoxConstraints(
+                                          minWidth: 28,
+                                          minHeight: 28,
+                                        ),
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const Divider(
+                        height: 1, thickness: 1, color: PrimeColors.lightGray),
+                  ],
+                  // Add photos button
+                  Container(
+                    padding: const EdgeInsets.all(20),
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        getImages();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: PrimeColors.primaryRed,
+                        foregroundColor: PrimeColors.pureWhite,
+                        elevation: 2,
+                        shadowColor: PrimeColors.primaryRed.withOpacity(0.3),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
+                      ),
+                      icon: const Icon(Icons.add_a_photo, size: 20),
+                      label: Text(
+                        selectedImages.isEmpty
+                            ? 'Add Photos'.tr()
+                            : 'Add More Photos'.tr(),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _noteController,
-              maxLines: 3,
-              keyboardType: TextInputType.multiline,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your notes'.tr();
-                }
-                return null;
-              },
-              onChanged: (value) {
-                setState(() {});
-              },
-              decoration: InputDecoration(
-                labelText: 'Add Note'.tr(),
-                hintText: 'Enter your notes here...'.tr(),
-                hintStyle: TextStyle(
-                  color: PrimeColors.lightGray,
-                  fontSize: 14,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8),
-                  borderSide:
-                      const BorderSide(color: PrimeColors.primaryRed, width: 2),
+            const SizedBox(height: 24),
+            Container(
+              decoration: BoxDecoration(
+                color: PrimeColors.pureWhite,
+                borderRadius: BorderRadius.circular(12),
+                border:
+                    Border.all(color: PrimeColors.lightGray.withOpacity(0.3)),
+                boxShadow: [
+                  BoxShadow(
+                    color: PrimeColors.pureBlack.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Add Note'.tr(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: PrimeColors.pureBlack,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextFormField(
+                      controller: _noteController,
+                      maxLines: 4,
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      keyboardType: TextInputType.multiline,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your notes'.tr();
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        setState(() {});
+                      },
+                      decoration: InputDecoration(
+                        hintText: 'Enter your notes here...'.tr(),
+                        hintStyle: TextStyle(
+                          color: PrimeColors.lightGray,
+                          fontSize: 14,
+                        ),
+                        filled: true,
+                        fillColor: PrimeColors.pureWhite,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: PrimeColors.lightGray.withOpacity(0.5),
+                          ),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(
+                            color: PrimeColors.lightGray.withOpacity(0.5),
+                          ),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: PrimeColors.primaryRed,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(16),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            SizedBox(
+            const SizedBox(height: 24),
+            Container(
               width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: _noteController.text.isNotEmpty
-                    ? () {
-                        // TODO: Handle photo upload with note
-                        final note = _noteController.text.trim();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(note.isNotEmpty
-                                ? 'Photos uploaded with note: $note'
-                                : 'Photos uploaded successfully!'),
-                            backgroundColor: PrimeColors.primaryRed,
-                          ),
-                        );
-                        _clearNote();
-                      }
-                    : null,
-                icon: const Icon(Icons.upload),
-                label: Text(
-                  'Upload Photos & Note'.tr(),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+              height: 56,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: PrimeColors.primaryRed.withOpacity(0.3),
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
-                ),
+                ],
               ),
+              child: Consumer<EmployeeProvider>(
+                  builder: (context, employeeProvider, child) {
+                return ElevatedButton.icon(
+                  onPressed: _noteController.text.isNotEmpty &&
+                          selectedImages.isNotEmpty &&
+                          !employeeProvider.isTMRSubmitLoading
+                      ? () {
+                          final scaffoldMessenger =
+                              ScaffoldMessenger.of(context);
+                          final navigator = Navigator.of(context);
+                          final note = _noteController.text.trim();
+                          final images = selectedImages;
+                          final clientId = widget.client.id;
+
+                          employeeProvider
+                              .submitTMRActivities(
+                                  images, clientId.toString(), note)
+                              .then((value) {
+                            if (value != null) {
+                              if (value.isSuccess!) {
+                                scaffoldMessenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(value.message!),
+                                    backgroundColor: PrimeColors.successGreen,
+                                  ),
+                                );
+                                _clearNote();
+                                navigator.pop();
+                              } else {
+                                scaffoldMessenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(value.message!),
+                                    backgroundColor: PrimeColors.primaryRed,
+                                  ),
+                                );
+                              }
+                            }
+                          });
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _noteController.text.isNotEmpty &&
+                            selectedImages.isNotEmpty
+                        ? PrimeColors.primaryRed
+                        : PrimeColors.lightGray,
+                    foregroundColor: PrimeColors.pureWhite,
+                    shadowColor: Colors.transparent,
+                    disabledBackgroundColor: PrimeColors.lightGray,
+                    disabledForegroundColor: PrimeColors.pureWhite,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                  ),
+                  icon: const Icon(Icons.send_rounded, size: 20),
+                  label: Text(
+                    'Submit'.tr(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                );
+              }),
             ),
           ],
         ),
@@ -413,33 +653,55 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
               },
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              height: 50,
-              child: ElevatedButton.icon(
-                onPressed: _selectedSalesOptions.isEmpty
-                    ? null
-                    : () {
-                        // TODO: Handle sales activity submission
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                                'Activities submitted: ${_selectedSalesOptions.join(', ')}'),
-                            backgroundColor: PrimeColors.primaryRed,
-                          ),
-                        );
-                        _clearSalesSelections();
-                      },
-                icon: const Icon(Icons.check),
-                label: Text(
-                  'Submit'.tr(),
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+            Consumer<EmployeeProvider>(
+                builder: (context, employeeProvider, child) {
+              return SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: _selectedSalesOptions.isEmpty ||
+                          employeeProvider.isSubmitLoading
+                      ? null
+                      : () {
+                          final scaffoldMessenger =
+                              ScaffoldMessenger.of(context);
+                          final navigator = Navigator.of(context);
+                          employeeProvider
+                              .submitSalesActivities(_selectedSalesOptions,
+                                  widget.client.id.toString())
+                              .then((value) {
+                            if (value != null) {
+                              if (value.isSuccess!) {
+                                scaffoldMessenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(value.message!),
+                                    backgroundColor: PrimeColors.successGreen,
+                                  ),
+                                );
+                                _clearSalesSelections();
+                                navigator.pop();
+                              } else {
+                                scaffoldMessenger.showSnackBar(
+                                  SnackBar(
+                                    content: Text(value.message!),
+                                    backgroundColor: PrimeColors.primaryRed,
+                                  ),
+                                );
+                              }
+                            }
+                          });
+                        },
+                  icon: const Icon(Icons.check),
+                  label: Text(
+                    'Submit'.tr(),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            }),
           ],
         ),
         const SizedBox(height: 16),
@@ -652,73 +914,64 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
     required IconData icon,
     required List<Widget> children,
   }) {
-    return Card(
-      elevation: 3,
-      shadowColor: PrimeColors.primaryRed.withValues(alpha: 0.2),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: PrimeColors.lightGray.withValues(alpha: 0.2),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: PrimeColors.pureWhite,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: PrimeColors.lightGray.withOpacity(0.2),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: PrimeColors.pureBlack.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+        ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              PrimeColors.pureWhite,
-              PrimeColors.pureWhite.withValues(alpha: 0.95),
-            ],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          PrimeColors.primaryRed.withValues(alpha: 0.1),
-                          PrimeColors.primaryRed.withValues(alpha: 0.05),
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: PrimeColors.primaryRed.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Icon(
-                      icon,
-                      color: PrimeColors.primaryRed,
-                      size: 20,
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: PrimeColors.primaryRed.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: PrimeColors.primaryRed.withOpacity(0.2),
+                      width: 1,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Text(
+                  child: Icon(
+                    icon,
+                    color: PrimeColors.primaryRed,
+                    size: 22,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Text(
                     title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w700,
                       color: PrimeColors.pureBlack,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              ...children,
-            ],
-          ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            ...children,
+          ],
         ),
       ),
     );

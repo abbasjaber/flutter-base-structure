@@ -16,6 +16,8 @@ class BaseUrls {
   static const String login = 'login';
   static const String employee = 'employee';
   static const String clients = 'clients';
+  static const String client = 'client';
   static const String employeeClients = 'employee/clients';
   static const String employeeHistory = 'employee/reports/list';
+  static const String employeeSubmitReport = 'employee/report';
 }

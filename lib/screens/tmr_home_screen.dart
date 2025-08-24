@@ -53,38 +53,6 @@ class _TmrHomeScreenState extends State<TmrHomeScreen> {
             );
           }
 
-          // Show error state if there's an error response
-          if (provider.responseModel != null &&
-              !provider.responseModel!.isSuccess!) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: PrimeColors.lightGray,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    provider.responseModel!.message ??
-                        'Failed to load clients'.tr(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: PrimeColors.lightGray,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _loadClients,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
-            );
-          }
-
           final clients = provider.clients;
           if (clients == null || clients.isEmpty) {
             return Center(
@@ -180,9 +148,9 @@ class _TmrHomeScreenState extends State<TmrHomeScreen> {
                                   width: 1,
                                 ),
                               ),
-                              child: client.crImage?.isNotEmpty ?? false
+                              child: client.boardImage?.isNotEmpty ?? false
                                   ? CachedNetworkImage(
-                                      imageUrl: client.crImage?.first ?? '',
+                                      imageUrl: client.boardImage?.first ?? '',
                                       placeholder: (context, url) =>
                                           const Center(
                                         child: CircularProgressIndicator(),

@@ -48,7 +48,13 @@ dependencies:
   cached_network_image: ^3.4.1
   map_launcher: ^3.5.0
   url_launcher: ^6.3.1
-  
+  flutter_image_compress: ^2.4.0
+  multiple_image_camera:
+    path: ./local_packages/Multiple-image-camera
+  image_picker: ^1.2.0
+  geolocator: ^14.0.1
+
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -66,10 +72,10 @@ dev_dependencies:
 # dart run flutter_native_splash:create
 flutter_native_splash:
     color: "#ffffff"
-    image: assets/images/logo/Logo-01.png
+    image: assets/images/logo/prime-12.png
     
     android_12:
-      image: assets/images/logo/Logo-01.png
+      image: assets/images/logo/prime-12.png
       icon_background_color: "#ffffff"
 
 # The following section is specific to Flutter packages.

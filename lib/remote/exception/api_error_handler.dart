@@ -50,11 +50,12 @@ class ApiErrorHandler {
                 case 403:
                   final data = error.response!.data;
                   final errors = data['errors'];
-                  String message = '';
+                  print(error.response!.data['message']);
+                  String message = error.response!.data['message'];
                   if (errors is Map<String, dynamic>) {
                     // Laravel-style: { "username": ["The username has already been taken."] }
                     message = errors.values.expand((e) => e as List).join('\n');
-                  } else if (errors is List) {
+                  } else if (errors is List && errors.isNotEmpty) {
                     message = errors
                         .whereType<
                             Map<String, dynamic>>() // Only keep valid maps
@@ -62,10 +63,11 @@ class ApiErrorHandler {
                             errorMap.values) // Get lists from each map
                         .expand((e) => e as List) // Flatten the lists
                         .join('\n');
-                  } else if (data['message'] != null) {
+                  } else if (data['message'] != "") {
                     // Fallback to main message
                     message = data['message'];
                   }
+
                   return message;
                 case 404:
                   return 'The requested resource does not exist.';
