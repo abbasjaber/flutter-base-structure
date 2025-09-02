@@ -327,5 +327,9 @@
   "Edit Client": "Edit Client",
   "Submit": "Submit",
   "Add Photos": "Add Photos",
-  "Add More Photos": "Add More Photos"
+  "Add More Photos": "Add More Photos",
+  "Please wait for the client to be loaded":"Please wait for the client to be loaded",
+  "Success": "Successfully Activity Submitted",
+  "Exit App": "Exit App",
+  "Are you sure you want to exit?": "Are you sure you want to exit?"
 }

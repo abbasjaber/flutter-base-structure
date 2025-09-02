@@ -6,6 +6,7 @@ import 'package:app/utils/common_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:multiple_image_camera/multiple_image_camera.dart';
 import 'package:provider/provider.dart';
@@ -526,14 +527,15 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen>
                               .then((value) {
                             if (value != null) {
                               if (value.isSuccess!) {
+                                _clearNote();
+                                selectedImages.clear();
+                                context.go('/');
                                 scaffoldMessenger.showSnackBar(
                                   SnackBar(
                                     content: Text(value.message!),
                                     backgroundColor: PrimeColors.successGreen,
                                   ),
                                 );
-                                _clearNote();
-                                navigator.pop();
                               } else {
                                 scaffoldMessenger.showSnackBar(
                                   SnackBar(
@@ -644,21 +646,20 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen>
                       : () {
                           final scaffoldMessenger =
                               ScaffoldMessenger.of(context);
-                          final navigator = Navigator.of(context);
                           employeeProvider
                               .submitSalesActivities(_selectedSalesOptions,
                                   widget.client.id.toString())
                               .then((value) {
                             if (value != null) {
                               if (value.isSuccess!) {
+                                _clearSalesSelections();
+                                context.go('/');
                                 scaffoldMessenger.showSnackBar(
                                   SnackBar(
-                                    content: Text(value.message!),
+                                    content: Text(value.message!).tr(),
                                     backgroundColor: PrimeColors.successGreen,
                                   ),
                                 );
-                                _clearSalesSelections();
-                                navigator.pop();
                               } else {
                                 scaffoldMessenger.showSnackBar(
                                   SnackBar(

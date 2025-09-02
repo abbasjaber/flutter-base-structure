@@ -324,5 +324,9 @@
   "Add Photos": "إضافة صور",
   "Add More Photos": "إضافة صور إضافية",
   "Store Information": "معلومات المتجر",
-  "Upload Photos": "رفع صور"
+  "Upload Photos": "رفع صور",
+  "Please wait for the client to be loaded": "الرجاء الانتظار حتى يتم تحميل العميل",
+  "Success": "تم تقديم النشاط بنجاح",
+  "Exit App": "الخروج من التطبيق",
+  "Are you sure you want to exit?": "هل أنت متأكد أنك تريد الخروج؟"
 }

@@ -5,6 +5,7 @@ import 'package:app/utils/common_widgets.dart';
 import 'package:barcode_scan2/platform_wrapper.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -38,7 +39,14 @@ class _MainPageState extends State<MainPage> {
     final isTmrUser = userPosition == 'TMR';
 
     return Scaffold(
-      body: widget.child,
+      body: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          _confirmExit();
+        },
+        child: widget.child,
+      ),
       floatingActionButton: _shouldShowFAB(context)
           ? CommonFloatingActionButton(
               label: 'New Visit'.tr(),
@@ -71,6 +79,14 @@ class _MainPageState extends State<MainPage> {
 
                 BarcodeScanner.scan().then((result) {
                   if (result.rawContent.isNotEmpty) {
+                    scaffoldMessenger.showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Please wait for the client to be loaded'.tr(),
+                        ),
+                        backgroundColor: PrimeColors.successGreen,
+                      ),
+                    );
                     _employeeProvider
                         ?.startVisit(
                       result.rawContent,
@@ -142,6 +158,32 @@ class _MainPageState extends State<MainPage> {
       case 1:
         context.go('/profile');
         break;
+    }
+  }
+
+  Future<void> _confirmExit() async {
+    final shouldExit = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text('Exit App'.tr()),
+          content: Text('Are you sure you want to exit?'.tr()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text('No'.tr()),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text('Yes'.tr()),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldExit == true) {
+      SystemNavigator.pop();
     }
   }
 }
