@@ -123,7 +123,12 @@ class EmployeeProvider extends ChangeNotifier {
   Future<ResponseModel?> startVisit(String barcode) async {
     _isStartVisitLoading = true;
     notifyListeners();
-    var locationData = await Geolocator.getCurrentPosition();
+    var locationData = await Geolocator.getCurrentPosition(
+      locationSettings: AndroidSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 1),
+          useMSLAltitude: true),
+    );
 
     apiResponse = await employeeRepo!.startVisit(
       locationData.latitude,

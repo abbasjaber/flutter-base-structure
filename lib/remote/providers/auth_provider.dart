@@ -84,4 +84,14 @@ class AuthProvider extends ChangeNotifier {
     authRepo.setLocale(locale);
     notifyListeners();
   }
+
+  Future<void> setEmployeeCoordinates(double latitude, double longitude) async {
+    apiResponse = await authRepo.setEmployeeCoordinates(latitude, longitude);
+    if (apiResponse!.response != null &&
+        apiResponse!.response!.statusCode == 200) {
+      responseModel = ResponseModel(true, 'Success');
+    } else {
+      responseModel = ResponseModel(false, apiResponse!.error.toString());
+    }
+  }
 }

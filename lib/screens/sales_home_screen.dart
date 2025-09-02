@@ -1,11 +1,13 @@
+import 'dart:io';
+
 import 'package:app/remote/providers/employee_provider.dart';
+import 'package:app/utils/common.dart';
 import 'package:app/utils/theme.dart';
 import 'package:app/utils/app_icons.dart';
 import 'package:app/utils/common_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 class SalesHomeScreen extends StatefulWidget {
@@ -15,7 +17,7 @@ class SalesHomeScreen extends StatefulWidget {
   State<SalesHomeScreen> createState() => _SalesHomeScreenState();
 }
 
-class _SalesHomeScreenState extends State<SalesHomeScreen> {
+class _SalesHomeScreenState extends State<SalesHomeScreen> with CommonFunction {
   EmployeeProvider? employeeProvider;
 
   Future<void> _loadClients() async {
@@ -105,97 +107,128 @@ class _SalesHomeScreenState extends State<SalesHomeScreen> {
                       width: 1,
                     ),
                   ),
-                  child: InkWell(
-                    onTap: () {
-                      context.push('/client-details', extra: client);
-                    },
-                    borderRadius: BorderRadius.circular(12),
-                    child: Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            PrimeColors.pureWhite,
-                            PrimeColors.pureWhite.withValues(alpha: 0.95),
-                          ],
-                        ),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          PrimeColors.pureWhite,
+                          PrimeColors.pureWhite.withValues(alpha: 0.95),
+                        ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Row(
-                          children: [
-                            // Client Image/Icon
-                            Container(
-                              width: 60,
-                              height: 60,
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    PrimeColors.primaryRed
-                                        .withValues(alpha: 0.1),
-                                    PrimeColors.primaryRed
-                                        .withValues(alpha: 0.05),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                  color: PrimeColors.primaryRed
-                                      .withValues(alpha: 0.2),
-                                  width: 1,
-                                ),
-                              ),
-                              child: client.boardImage?.isNotEmpty ?? false
-                                  ? CachedNetworkImage(
-                                      imageUrl: client.boardImage?.first ?? '',
-                                      placeholder: (context, url) =>
-                                          const Center(
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          const Icon(Icons.error),
-                                    )
-                                  : const Icon(Icons.store),
-                            ),
-                            const SizedBox(width: 16),
-
-                            // Client Information
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    client.boardName ?? 'Unknown Shop'.tr(),
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: PrimeColors.pureBlack,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 4),
-                                  if (client.shopCode != null)
-                                    Text(
-                                      'Code: ${client.shopCode}'.tr(),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: PrimeColors.lightGray,
-                                      ),
-                                    ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          // Client Image/Icon
+                          Container(
+                            width: 60,
+                            height: 60,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  PrimeColors.primaryRed.withValues(alpha: 0.1),
+                                  PrimeColors.primaryRed
+                                      .withValues(alpha: 0.05),
                                 ],
                               ),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: PrimeColors.primaryRed
+                                    .withValues(alpha: 0.2),
+                                width: 1,
+                              ),
+                            ),
+                            child: client.boardImage?.isNotEmpty ?? false
+                                ? CachedNetworkImage(
+                                    imageUrl: client.boardImage?.first ?? '',
+                                    placeholder: (context, url) => const Center(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                    errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error),
+                                  )
+                                : const Icon(Icons.store),
+                          ),
+                          const SizedBox(width: 16),
+
+                          // Client Information
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  client.boardName ?? 'Unknown Shop'.tr(),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: PrimeColors.pureBlack,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                if (client.shopCode != null)
+                                  Text(
+                                    'Code: ${client.shopCode}'.tr(),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: PrimeColors.lightGray,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          // Navigation Arrow
+                          if (client.managerPhone != null ||
+                              client.ownerPhone != null)
+                            IconButton(
+                              onPressed: () {
+                                String phone = client.managerPhone ??
+                                    client.ownerPhone ??
+                                    '';
+                                openExternalUrl('tel:$phone');
+                              },
+                              icon: Icon(
+                                Icons.phone,
+                                color: PrimeColors.lightGray,
+                                size: 16,
+                              ),
                             ),
 
-                            // Navigation Arrow
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              color: PrimeColors.lightGray,
-                              size: 16,
+                          if (client.latitude != null &&
+                              client.longitude != null)
+                            IconButton(
+                              onPressed: () {
+                                if (Platform.isAndroid) {
+                                  openExternalUrl(
+                                      'geo:${client.latitude},${client.longitude}');
+                                } else {
+                                  openExternalUrl(
+                                      'https://maps.google.com/?q=${client.latitude},${client.longitude}');
+                                }
+                              },
+                              icon: Icon(
+                                Icons.location_on,
+                                color: PrimeColors.lightGray,
+                                size: 16,
+                              ),
                             ),
-                          ],
-                        ),
+
+                          // IconButton(
+                          //   onPressed: () {
+                          //     context.push('/client-details', extra: client);
+                          //   },
+                          //   icon: Icon(
+                          //     Icons.arrow_forward_ios,
+                          //     color: PrimeColors.lightGray,
+                          //     size: 16,
+                          //   ),
+                          // ),
+                        ],
                       ),
                     ),
                   ),

@@ -1,5 +1,6 @@
 import 'package:app/remote/models/client_model.dart';
 import 'package:app/remote/providers/employee_provider.dart';
+import 'package:app/utils/common.dart';
 import 'package:app/utils/theme.dart';
 import 'package:app/utils/common_widgets.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -23,7 +24,8 @@ class ClientDetailsScreen extends StatefulWidget {
   State<ClientDetailsScreen> createState() => _ClientDetailsScreenState();
 }
 
-class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
+class _ClientDetailsScreenState extends State<ClientDetailsScreen>
+    with CommonFunction {
   final List<String> _selectedSalesOptions = [];
   final TextEditingController _noteController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
@@ -37,7 +39,6 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
   final picker = ImagePicker();
   Future getImages() async {
     MultipleImageCamera.capture(context: context).then((finalImages) async {
-      selectedImages = [];
       if (finalImages.isNotEmpty) {
         for (var images in finalImages) {
           selectedImages.add(images.file.path);
@@ -145,7 +146,7 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
 
                   // Contact Information
                   _buildSectionCard(
-                    title: 'Contact Information'.tr(),
+                    title: 'Store Information'.tr(),
                     icon: Icons.contact_phone,
                     children: [
                       if (widget.client.ownerName != null)
@@ -153,28 +154,12 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
                           icon: Icons.person,
                           title: 'Owner'.tr(),
                           subtitle: widget.client.ownerName!,
-                          trailing: widget.client.ownerPhone != null
-                              ? IconButton(
-                                  icon: const Icon(Icons.phone),
-                                  onPressed: () {
-                                    // TODO: Make phone call
-                                  },
-                                )
-                              : null,
                         ),
                       if (widget.client.managerName != null)
                         _buildInfoTile(
                           icon: Icons.manage_accounts,
                           title: 'Manager'.tr(),
                           subtitle: widget.client.managerName!,
-                          trailing: widget.client.managerPhone != null
-                              ? IconButton(
-                                  icon: const Icon(Icons.phone),
-                                  onPressed: () {
-                                    // TODO: Make phone call
-                                  },
-                                )
-                              : null,
                         ),
                     ],
                   ),
@@ -249,12 +234,6 @@ class _ClientDetailsScreenState extends State<ClientDetailsScreen> {
                           title: 'Coordinates'.tr(),
                           subtitle:
                               '${widget.client.latitude}, ${widget.client.longitude}',
-                          trailing: IconButton(
-                            icon: const Icon(Icons.map),
-                            onPressed: () {
-                              // TODO: Open in maps
-                            },
-                          ),
                         ),
                     ],
                   ),

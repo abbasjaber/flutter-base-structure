@@ -95,4 +95,16 @@ class AuthRepo extends RepoAbstract {
     dioClient.dio.options.headers['Accept-Language'] = locale;
     return sharedPreferences.setString(AppConstants.locale, locale);
   }
+
+  Future<ApiResponse> setEmployeeCoordinates(double latitude, double longitude) async {
+    try {
+      Response response = await dioClient.post(
+        BaseUrls.productionAPi + BaseUrls.employeeCoordinates,
+        data: {'latitude': latitude, 'longitude': longitude},
+      );
+      return ApiResponse.withSuccess(response);
+    } catch (e) {
+      return ApiResponse.withError(ApiErrorHandler.getMessage(e));
+    }
+  }
 }

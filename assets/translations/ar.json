@@ -318,9 +318,11 @@
   "Visit Activities": "أنشطة الزيارة",
   "Sales Dashboard": "لوحة تحكم المبيعات",
   "TMR Dashboard": "لوحة تحكم المدير",
-    "Client Details": "تفاصيل العميل",
+  "Client Details": "تفاصيل العميل",
   "Edit Client": "تعديل العميل",
   "Submit": "ارسال",
   "Add Photos": "إضافة صور",
-  "Add More Photos": "إضافة صور إضافية"
+  "Add More Photos": "إضافة صور إضافية",
+  "Store Information": "معلومات المتجر",
+  "Upload Photos": "رفع صور"
 }
