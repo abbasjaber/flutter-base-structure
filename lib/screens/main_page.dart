@@ -94,7 +94,7 @@ class _MainPageState extends State<MainPage> {
                         .then((value) {
                       if (value?.isSuccess == true) {
                         if (context.mounted) {
-                          context.go('/client-details',
+                          context.push('/client-details',
                               extra: _employeeProvider?.client);
                         }
                       } else {
