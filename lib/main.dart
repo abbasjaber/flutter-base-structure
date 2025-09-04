@@ -97,7 +97,7 @@ class _MyAppState extends State<MyApp> {
                   if (!authProvider.isLoggedIn()) {
                     return '/login';
                   }
-                  return null;
+                  return '/';
                 },
               ),
               // History route
