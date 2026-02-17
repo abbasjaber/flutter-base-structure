@@ -2,15 +2,15 @@ import 'package:app/remote/providers/example_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key, required this.title});
   final String title;
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  ExampleProvider? examoleProvider;
+class _HomeScreenState extends State<HomeScreen> {
+  ExampleProvider? exapmleProvider;
   int _counter = 0;
 
   void _incrementCounter() {
@@ -20,12 +20,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> init() async {
-    await examoleProvider!.getItems();
+    await exapmleProvider!.getItems();
   }
 
   @override
   void initState() {
-    examoleProvider = Provider.of<ExampleProvider>(context, listen: false);
+    exapmleProvider = Provider.of<ExampleProvider>(context, listen: false);
     init();
     super.initState();
   }

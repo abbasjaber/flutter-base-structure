@@ -1,4 +1,4 @@
-import 'package:app/pages/home_page.dart';
+import 'package:app/screens/home_screen.dart';
 import 'package:app/remote/providers/auth_provider.dart';
 import 'package:app/remote/providers/example_provider.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +23,9 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const HomeScreen(
+        title: 'Flutter Demo Home Page',
+      ),
     );
   }
 }

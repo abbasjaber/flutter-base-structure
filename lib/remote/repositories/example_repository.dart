@@ -12,8 +12,7 @@ class ExamoleRepo extends RepoAbstract {
   @override
   Future<ApiResponse> get() async {
     try {
-      response =
-          await dioClient.get("http://depotlink.co/jsontest/itemstree.json");
+      response = await dioClient.get("");
       return ApiResponse.withSuccess(response!);
     } catch (e) {
       return ApiResponse.withError(ApiErrorHandler.getMessage(e));
