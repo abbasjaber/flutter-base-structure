@@ -1,19 +1,17 @@
-import 'package:app/remote/models/user_model.dart';
-import 'package:app/remote/repositories/auth_repository.dart';
-import 'package:app/remote/response/api_response.dart';
-import 'package:app/remote/response/response_model.dart';
+import 'package:app/features/auth/models/user_model.dart';
+import 'package:app/features/auth/repositories/auth_repository.dart';
+import 'package:app/core/network/api_response.dart';
+import 'package:app/core/network/response_model.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 class AuthProvider extends ChangeNotifier {
-  AuthRepo authRepo;
+  final AuthRepo authRepo;
+
   AuthProvider({required this.authRepo});
 
-  bool? _isLoading = false;
-  bool? _isLoadingPassword;
+  bool _isLoading = false;
 
-  bool? get isLoading => _isLoading;
-  bool? get isLoadingPassword => _isLoadingPassword;
+  bool get isLoading => _isLoading;
 
   String? _loginErrorMessage;
   String? get loginErrorMessage => _loginErrorMessage;
@@ -26,27 +24,28 @@ class AuthProvider extends ChangeNotifier {
 
   Future<ResponseModel?> login(UserModel c) async {
     _isLoading = true;
-    _loginErrorMessage = '';
+    _loginErrorMessage = null;
     notifyListeners();
+
     apiResponse = await authRepo.login(c);
-    if (apiResponse!.response != null &&
-        apiResponse!.response!.statusCode == 200) {
+    
+    if (apiResponse != null && apiResponse!.response != null && apiResponse!.response!.statusCode == 200) {
       Map map = apiResponse!.response!.data;
       String token = map["token"];
-      authRepo.saveUserToken(token);
+      await authRepo.saveUserToken(token);
       responseModel = ResponseModel(true, 'Success');
     } else {
-      _isLoading = false;
-
       String errorMessage;
-      if (apiResponse!.error is String) {
+      if (apiResponse?.error is String) {
         errorMessage = apiResponse!.error.toString();
       } else {
-        errorMessage = apiResponse!.error.errors[0].message;
+        // Fallback or better typed error extraction
+        errorMessage = apiResponse?.error?.toString() ?? 'An error occurred';
       }
       _loginErrorMessage = errorMessage;
       responseModel = ResponseModel(false, errorMessage);
     }
+    
     _isLoading = false;
     notifyListeners();
     return responseModel;
@@ -57,10 +56,6 @@ class AuthProvider extends ChangeNotifier {
   }
 
   bool logout() {
-    if (authRepo.logout()) {
-      return false;
-    } else {
-      return authRepo.logout();
-    }
+    return authRepo.logout();
   }
 }

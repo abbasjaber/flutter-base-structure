@@ -1,45 +1,34 @@
 import 'dart:io';
 
-import 'package:app/remote/constants/app_constants.dart';
 import 'package:dio/dio.dart';
 
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'logging_interceptor.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
+import 'auth_interceptor.dart';
 
 class DioClient {
-  late String baseUrl;
-  LoggingInterceptor? loggingInterceptor;
-  SharedPreferences? sharedPreferences;
+  final String baseUrl;
+  final LoggingInterceptor? loggingInterceptor;
+  final AuthInterceptor? authInterceptor;
 
   late Dio dio;
-  String? token;
 
   DioClient(
     this.baseUrl,
     Dio dioC, {
     this.loggingInterceptor,
-    this.sharedPreferences,
+    this.authInterceptor,
+    // SharedPreferences not strictly needed here anymore, but keeping signature flexible
+    dynamic sharedPreferences,
   }) {
-    token = sharedPreferences?.getString(AppConstants.token);
     dio = dioC;
-    dio
-      ..options.baseUrl = baseUrl
-      ..httpClientAdapter
-      ..options.headers = {
-        'Content-Type': 'application/json; charset=UTF-8',
-        'Authorization': 'Bearer $token'
-      };
-
-    // dio.interceptors.add(DioCacheInterceptor(
-    //     options: CacheOptions(
-    //   store: MemCacheStore(),
-    //   policy: CachePolicy.forceCache,
-    //   priority: CachePriority.high,
-    //   maxStale: const Duration(days: 1),
-    // )));
-    dio.interceptors.add(loggingInterceptor!);
+    dio.options.baseUrl = baseUrl;
+    
+    if (authInterceptor != null) {
+      dio.interceptors.add(authInterceptor!);
+    }
+    if (loggingInterceptor != null) {
+      dio.interceptors.add(loggingInterceptor!);
+    }
   }
 
   Future<Response> get(
@@ -69,7 +58,7 @@ class DioClient {
 
   Future<Response> post(
     String uri, {
-    data,
+    dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
@@ -96,7 +85,7 @@ class DioClient {
 
   Future<Response> put(
     String uri, {
-    data,
+    dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
@@ -123,7 +112,7 @@ class DioClient {
 
   Future<Response> delete(
     String uri, {
-    data,
+    dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,

@@ -4,15 +4,6 @@ class UserModel {
   String? email;
   String? password;
 
-  get getId => id;
-  set setId(id) => this.id = id;
-
-  get getName => name;
-
-  get getEmail => email;
-
-  get getPassword => password;
-
   UserModel({this.id, this.name, this.email, this.password});
 
   UserModel.fromJson(Map<String, dynamic> json) {

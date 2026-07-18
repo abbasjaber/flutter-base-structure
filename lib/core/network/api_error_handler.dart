@@ -1,9 +1,10 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
-//import 'package:almahboub/data/model/response/base/error_response.dart';
 
 class ApiErrorHandler {
-  static dynamic getMessage(error) {
+  static dynamic getMessage(dynamic error) {
     dynamic errorDescription = "";
     if (error is Exception) {
       try {
@@ -24,7 +25,7 @@ class ApiErrorHandler {
                   "Receive timeout in connection with API server";
               break;
             case DioExceptionType.badResponse:
-              switch (error.response!.statusCode) {
+              switch (error.response?.statusCode) {
                 case 400:
                   return 'Bad request.';
                 case 401:
@@ -53,12 +54,14 @@ class ApiErrorHandler {
               errorDescription = "Bad Certificate";
               break;
             case DioExceptionType.unknown:
-              if (error.message!.contains('SocketException')) {
+              if (error.message != null && error.message!.contains('SocketException')) {
                 errorDescription = 'No Internet.';
                 break;
               }
               errorDescription = 'Unexpected error occurred.';
-              errorDescription = "Connection timeout with API server";
+              break;
+            default:
+              errorDescription = "Unknown connection error";
               break;
           }
         } else {
@@ -70,7 +73,7 @@ class ApiErrorHandler {
     } else {
       errorDescription = "is not a subtype of exception";
     }
-    print(errorDescription);
-    return tr(errorDescription);
+    log(errorDescription.toString());
+    return tr(errorDescription.toString());
   }
 }

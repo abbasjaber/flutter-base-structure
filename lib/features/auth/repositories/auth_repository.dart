@@ -1,10 +1,10 @@
-import 'package:app/remote/constants/app_constants.dart';
-import 'package:app/remote/dio/dio_client.dart';
-import 'package:app/remote/exception/api_error_handler.dart';
-import 'package:app/remote/interface/repo_inteface.dart';
-import 'package:app/remote/models/user_model.dart';
-import 'package:app/remote/response/api_response.dart';
-import 'package:app/remote/constants/config_model.dart';
+import 'package:app/core/constants/app_constants.dart';
+import 'package:app/core/network/dio_client.dart';
+import 'package:app/core/network/api_error_handler.dart';
+import 'package:app/core/interfaces/repo_interface.dart';
+import 'package:app/features/auth/models/user_model.dart';
+import 'package:app/core/network/api_response.dart';
+import 'package:app/core/constants/config_model.dart';
 
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,6 +14,7 @@ class AuthRepo extends RepoAbstract {
   final SharedPreferences sharedPreferences;
 
   AuthRepo({required this.dioClient, required this.sharedPreferences});
+  
   @override
   Future<ApiResponse> get() async {
     throw UnimplementedError();
@@ -21,8 +22,9 @@ class AuthRepo extends RepoAbstract {
 
   Future<ApiResponse> login(UserModel c) async {
     try {
+      // DioClient already sets baseUrl from config, so just pass the endpoint path.
       Response response = await dioClient.post(
-        BaseUrls.productionAPi + BaseUrls.login,
+        BaseUrls.login,
         data: c.toJson(),
       );
       return ApiResponse.withSuccess(response);
@@ -32,11 +34,8 @@ class AuthRepo extends RepoAbstract {
   }
 
   Future<void> saveUserToken(String token) async {
-    dioClient.token = token;
-    dioClient.dio.options.headers = {
-      'Content-Type': 'application/json; charset=UTF-8',
-      'Authorization': 'Bearer $token'
-    };
+    // We only need to save it to SharedPreferences.
+    // The AuthInterceptor will automatically pick it up for future requests.
     try {
       await sharedPreferences.setString(AppConstants.token, token);
     } catch (e) {
@@ -45,26 +44,18 @@ class AuthRepo extends RepoAbstract {
   }
 
   bool isLogin() {
-    try {
-      return sharedPreferences.get(AppConstants.token) != null ? true : false;
-    } catch (e) {
-      rethrow;
-    }
+    return sharedPreferences.getString(AppConstants.token) != null;
   }
 
   bool logout() {
-    try {
-      sharedPreferences.remove(AppConstants.token);
-      return sharedPreferences.get(AppConstants.token) == null ? true : false;
-    } catch (e) {
-      rethrow;
-    }
+    sharedPreferences.remove(AppConstants.token);
+    return sharedPreferences.getString(AppConstants.token) == null;
   }
 
   Future<ApiResponse> register(UserModel c) async {
     try {
       Response response = await dioClient.post(
-        BaseUrls.productionAPi + BaseUrls.register,
+        BaseUrls.register,
         data: c.toJson(),
       );
       return ApiResponse.withSuccess(response);

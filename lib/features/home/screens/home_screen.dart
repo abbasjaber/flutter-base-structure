@@ -1,16 +1,16 @@
-import 'package:app/remote/providers/example_provider.dart';
+import 'package:app/features/home/providers/example_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, required this.title});
   final String title;
+  
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  ExampleProvider? exapmleProvider;
   int _counter = 0;
 
   void _incrementCounter() {
@@ -20,14 +20,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> init() async {
-    await exapmleProvider!.getItems();
+    final exampleProvider = context.read<ExampleProvider>();
+    await exampleProvider.getItems();
   }
 
   @override
   void initState() {
-    exapmleProvider = Provider.of<ExampleProvider>(context, listen: false);
-    init();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      init();
+    });
   }
 
   @override
@@ -46,6 +48,15 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 20),
+            Consumer<ExampleProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLoading) {
+                  return const CircularProgressIndicator();
+                }
+                return Text('API Status: ${provider.responseModel?.message ?? "Waiting"}');
+              },
             ),
           ],
         ),

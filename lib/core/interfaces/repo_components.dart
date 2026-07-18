@@ -1,4 +1,4 @@
-import 'package:app/remote/response/api_response.dart';
+import 'package:app/core/network/api_response.dart';
 
 abstract class CompoAbstract {
   Future<ApiResponse> getlists(dynamic model);
