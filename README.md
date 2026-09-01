@@ -43,12 +43,17 @@ git clone https://github.com/abbasjaber/flutter-base-structure.git
 cd flutter-base-structure
 ```
 
-### 3. Get dependencies
+### 3. Create platform folders
+```bash
+flutter create --platforms=android,ios .
+```
+
+### 4. Get dependencies
 ```bash
 flutter pub get
 ```
 
-### 4. Run application
+### 5. Run application
 ```bash
 flutter run
 ```
